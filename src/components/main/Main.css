@@ -1,0 +1,134 @@
+/* Existing styles */
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  header {
+    background-color: #4CAF50;
+    padding: 1rem;
+    text-align: center;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .logo {
+    width: 50px;
+    height: auto;
+    margin-right: 10px;
+  }
+  
+  h1 {
+    margin: 0;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: auto;
+  }
+  
+  section {
+    margin-top: 20px;
+  }
+  
+  input {
+    padding: 8px;
+    margin-right: 8px;
+  }
+  
+  button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 20px;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  li {
+    margin-bottom: 8px;
+  }
+  
+  .alert {
+    background-color: #f44336;
+    color: white;
+    padding: 8px;
+    margin-top: 10px;
+  }
+  
+  /* New layout styles */
+  
+  /* Existing styles */
+
+/* ... (your existing styles) */
+
+/* New layout styles */
+
+.sil {
+    background-color: transparent;
+    border: none;
+    color: red;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 5px;
+  }
+  
+  .flex-container {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+    flex-wrap: wrap; /* Allow items to wrap to the next line */
+  }
+  
+  .flex-item1 {
+    display: inline-block;
+    width: 100%; /* Adjust the width as needed */
+    order: 1; /* Higher order to appear at the top */
+    margin-bottom: 100px;
+    margin-top: 50px;
+  }
+  
+  .flex-item3 {
+    width: 30%; /* Adjust the width as needed */
+    order: 2;
+    margin-top: 40px;
+  }
+  .flex-item2 {
+    width: 30%; /* Adjust the width as needed */
+    order: 1;
+  }
+  
+  .flex-item4 {
+    width: 30%; /* Adjust the width as needed */
+    order: 2;
+  }
+  
+  .table-container {
+    width: 30%; /* Adjust the width as needed */
+  }
+  
+  table {
+    text-align: center;
+    margin: 0 auto;
+  }
+  
+
+  .cek{
+    width: 200px !important;
+    height: 80px;
+    font-size: large;
+  }
+
