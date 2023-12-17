@@ -4,10 +4,12 @@ body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
+    background: url('k.png') no-repeat center center fixed;
+    background-size: contain;    
   }
   
   header {
-    background-color: #4CAF50;
+    background-color: transparent;
     padding: 1rem;
     text-align: center;
     color: white;
@@ -17,13 +19,15 @@ body {
   }
   
   .logo {
-    width: 50px;
+    width: 90px;
     height: auto;
     margin-right: 10px;
+
   }
   
   h1 {
     margin: 0;
+    font-size: 60px;
   }
   
   .container {
@@ -104,16 +108,29 @@ body {
   .flex-item3 {
     width: 30%; /* Adjust the width as needed */
     order: 2;
-    margin-top: 40px;
+    margin-top: 0px !important;
+    margin-bottom: 30px;
   }
   .flex-item2 {
     width: 30%; /* Adjust the width as needed */
     order: 1;
+    border: 1px solid #fffefe;
+    border-radius: 30px;
+    background: blur(5px) #fffefe;
+    height: 550px;
+    margin-top: -100px;
   }
   
   .flex-item4 {
     width: 30%; /* Adjust the width as needed */
     order: 2;
+    border: 1px solid #fff7f7;
+    border-radius: 30px;
+    height: 550px;
+    margin-top: -100px;
+
+
+
   }
   
   .table-container {
@@ -121,8 +138,8 @@ body {
   }
   
   table {
-    text-align: center;
     margin: 0 auto;
+    font-size: large;
   }
   
 
@@ -132,3 +149,100 @@ body {
     font-size: large;
   }
 
+  @media (max-width: 767px) {
+    .flex-container {
+      flex-direction: column; /* Mobilde alt alta düzenleme */
+    }
+  
+    .flex-item1,
+    .flex-item2,
+    .flex-item3,
+    .flex-item4 {
+      width: 100%; /* Genişlik tüm ekranı kaplasın */
+    }
+    .flex-item2 {
+      height: 200px;
+    }
+    .flex-item4 {
+      height: 200px;
+    }
+  }
+  
+  .silk{
+    margin-bottom: 20px;
+    width: 70%;
+  }
+
+
+  body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: url('k.png') no-repeat center center;
+    background-size: cover;
+    color: white; /* Tüm textlerin beyaz renkte olmasını sağlar */
+}
+
+header {
+    background-color: transparent;
+    padding: 1rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.flex-item2 {
+ 
+  backdrop-filter: blur(5px); /* Blur efekti */
+}
+
+.flex-item4 {
+
+  backdrop-filter: blur(5px); /* Blur efekti */
+}
+
+
+
+
+/* ... (diğer stiller) */
+
+@media (max-width: 767px) {
+  .flex-container {
+    flex-direction: column; /* Mobilde alt alta düzenleme */
+    margin: 10px; /* Kenar boşluklarını ayarla */
+  }
+
+  .flex-item1,
+  .flex-item2,
+  .flex-item3,
+  .flex-item4 {
+    width: 100%; /* Genişlik tüm ekranı kaplasın */
+    margin-bottom: 20px; /* Alt alta düzenlemede aralıkları ayarla */
+  }
+
+  .flex-item2,
+  .flex-item4 {
+    height: 200px; /* Yükseklik ayarı */
+    margin-top: 0; /* Yukarıdaki negatif margin'ı sıfırla */
+  }
+  
+  .table-container {
+    width: 100%; /* Genişlik tüm ekranı kaplasın */
+  }
+
+  .silk {
+    width: 100%; /* Genişlik tüm ekranı kaplasın */
+  }
+}
+
+@media (max-width: 767px) {
+  .flex-container {
+    overflow: auto;
+    
+    /* Diğer stiller */
+  }
+
+  /* Diğer stiller */
+}

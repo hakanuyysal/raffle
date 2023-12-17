@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import "./Main.css";
 import "font-awesome/css/font-awesome.min.css";
 
-const App = () => {
+const Main = () => {
   const [katilimcilar, setKatilimcilar] = useState([]);
   const [eslesmeler, setEslesmeler] = useState([]);
 
@@ -57,13 +57,16 @@ const App = () => {
     return shuffledArray;
   };
 
+  const redirectToGame = () => {
+    window.location.href = "/game";
+  };
+
   return (
     <div>
       <header>
         <img className="logo" src="aa.png" alt="Logo" />
-        <h1>ALOHA ile Yılbaşı Çekilişi</h1>
+        <h1>Yılbaşı Çekilişi</h1>
       </header>
-
       <div className="flex-container">
         {/* Katılımcı Ekle Kısmı */}
         <div className="flex-item1">
@@ -80,46 +83,51 @@ const App = () => {
         {/* Diğer İçerikler */}
         <div className="flex-item2">
           <h2>Katılımcı Listesi</h2>
-          {katilimcilar.length > 0 ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>Katılımcı</th>
-                </tr>
-              </thead>
-              <tbody>
-                {katilimcilar.map((katilimci, index) => (
-                  <tr key={index}>
-                    <td>{katilimci}</td>
-                    <td>
-                      <i
-                        className="fas fa-trash-alt sil "
-                        onClick={() => katilimciSil(index)}
-                      />
-                    </td>
+          <div className="flex-item2-container">
+            {katilimcilar.length > 0 ? (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Katılımcı</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p>Henüz katılımcı yok.</p>
-          )}
-         <br /> {katilimcilar.length > 0 && ( 
-            <button className="silk" onClick={katilimcilarTemizle}>
-              Listeyi Temizle
-            </button>
-          )}
+                </thead>
+                <tbody>
+                  {katilimcilar.map((katilimci, index) => (
+                    <tr key={index}>
+                      <td>{katilimci}</td>
+                      <td>
+                        <i
+                          style={{ color: "white" }}
+                          className="fas fa-trash-alt sil "
+                          onClick={() => katilimciSil(index)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>Henüz katılımcı yok.</p>
+            )}
+            <br />
+            {katilimcilar.length > 0 && (
+              <button className="silk" onClick={katilimcilarTemizle}>
+                Listeyi Temizle
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex-item3">
           <h2>Çekiliş Yap</h2>
-          <button className="cek" onClick={cekilisYap}>Çekiliş Yap</button>
+          <button className="cek" onClick={cekilisYap}>
+            Çekiliş Yap
+          </button>
         </div>
 
-        {eslesmeler.length > 0 && (
+        {eslesmeler.length > 0 ? (
           <div className="flex-item4">
-            <h2>Eşleşmeler</h2>
-            
+            <h2>Eşleşme Listesi</h2>
             <table>
               <thead>
                 <tr>
@@ -130,20 +138,29 @@ const App = () => {
               <tbody>
                 {eslesmeler.map((eslesme, index) => (
                   <tr key={index}>
-                    <td>{eslesme.from}</td>{"-"}
+                    <td>{eslesme.from}</td>
+                    {"-"}
                     <td>{eslesme.to}</td>
                   </tr>
                 ))}
               </tbody>
-            </table><br />
-            <button onClick={() => setEslesmeler([])}>
+            </table>
+            <br />
+            <button className="silk" onClick={() => setEslesmeler([])}>
               Eşleşmeleri Temizle
             </button>
           </div>
+        ) : (
+          <div className="flex-item4">
+            <h2>Eşleşme Listesi</h2>
+            <p>Eşleşme için çekiliş yapınız.</p>
+          </div>
         )}
       </div>
+      <br />
+      <br />
     </div>
   );
 };
 
-export default App;
+export default Main;

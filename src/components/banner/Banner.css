@@ -1,0 +1,30 @@
+.marquee-container {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+  }
+  
+  .marquee {
+    display: flex;
+    justify-content: center;
+    animation: blink 3s linear infinite; /* Yanıp sönen animasyon, 3 saniyede bir yanıp sönsün */
+background-color: rgb(254, 15, 15);  
+}
+  
+  .christmas-tree {
+    width: 30px; /* Ağaç genişliği */
+    height: 40px; /* Ağaç yüksekliği */
+    background-color: green; /* Ağaç rengi */
+    margin-right: 10px; /* Ağaçlar arası boşluk */
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Ağaç şekli */
+  }
+  
+  @keyframes blink {
+    0%, 50%, 100% {
+      opacity: 1;
+    }
+    25%, 75% {
+      opacity: 0;
+    }
+  }
+  
