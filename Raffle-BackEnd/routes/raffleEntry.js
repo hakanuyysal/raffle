@@ -65,15 +65,80 @@ router.get("/match-users/:teamName", async (req, res) => {
     const matches = matchTeamMembers(team.members);
     res.json({ success: true, matches });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Ekipler arasında eşleşme yapılırken bir hata oluştu",
-        error,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Ekipler arasında eşleşme yapılırken bir hata oluştu",
+      error,
+    });
   }
 });
+
+router.get("/match-users/:teamName/:participantName", async (req, res) => {
+  try {
+    const teamName = req.params.teamName;
+    const participantName = req.params.participantName;
+
+    if (!teamName || !participantName) {
+      return res.status(400).json({
+        success: false,
+        message: "Ekip adı veya katılımcı adı belirtilmedi",
+      });
+    }
+
+    const team = await Team.findOne({ name: teamName }).populate("members");
+
+    if (!team) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Belirtilen ekip bulunamadı" });
+    }
+
+    const participant = team.members.find(
+      (member) => member.name === participantName
+    );
+
+    if (!participant) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Belirtilen katılımcı bulunamadı" });
+    }
+
+    const matches = matchTeamMembers(team.members);
+    const matchedUser = findMatchedUser(matches, participant._id);
+
+    if (!matchedUser) {
+      return res.json({
+        success: true,
+        message: "Eşleşme bulunamadı",
+        matchedUser: null,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Eşleşme bulundu",
+      matchedUser: { _id: matchedUser._id, name: matchedUser.name },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Ekipler arasında eşleşme yapılırken bir hata oluştu",
+      error,
+    });
+  }
+});
+
+// Eşleşme bulma fonksiyonu
+function findMatchedUser(matches, participantId) {
+  for (const match of matches) {
+    if (match.user1._id.toString() === participantId.toString()) {
+      return match.user2;
+    } else if (match.user2._id.toString() === participantId.toString()) {
+      return match.user1;
+    }
+  }
+  return null;
+}
 
 // Belirli bir ekip altındaki katılımcılar arasında eşleşme yapma fonksiyonu
 function matchTeamMembers(members) {
