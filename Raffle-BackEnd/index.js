@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const raffleEntryRoute = require("./routes/raffleEntry");
+const cors = require("cors");
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ mongoose
     console.log(err);
   });
 
+app.use(cors());
 app.use(express.json());
 app.use("/api/raffleEntry", raffleEntryRoute);
 
