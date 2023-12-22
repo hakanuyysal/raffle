@@ -1,8 +1,8 @@
-import './App.css';
-import Main from './components/main/Main';
-import Snow from './components/snow/Snow';
-import Count from './components/count/Count';
-import Game from './components/game/Game';
+import "./App.css";
+import Main from "./components/main/Main";
+import Snow from "./components/snow/Snow";
+import Count from "./components/count/Count";
+// import Game from "./components/game/Game";
 
 function App() {
   return (
@@ -10,8 +10,7 @@ function App() {
       <Snow />
       <Main />
       <Count />
-      <Game />
-
+      {/* <Game /> */}
     </div>
   );
 }
