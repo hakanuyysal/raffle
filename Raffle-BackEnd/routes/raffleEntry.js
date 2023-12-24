@@ -80,11 +80,12 @@ router.get("/get-teams", async (req, res) => {
   }
 });
 
+// Bu değişkeni modül düzeyinde tanımlayarak her istekte yeniden oluşturulmasını engelliyoruz
+let cachedMatches = [];
+
 router.get("/match-users/:teamName", async (req, res) => {
   try {
     const teamName = req.params.teamName;
-
-    // console.log(teamName);
 
     if (!teamName) {
       return res
@@ -96,32 +97,54 @@ router.get("/match-users/:teamName", async (req, res) => {
       name: { $regex: new RegExp(`^${teamName}$`, "i") },
     });
 
-    // console.log(team);
-
     if (!team) {
       return res
         .status(404)
         .json({ success: false, message: "Belirtilen ekip bulunamadı" });
     }
 
-    const teamMembers = await RaffleEntry.find({ team: team._id });
-    const matches = matchTeamMembers(teamMembers);
+    // Eğer daha önce eşleşme listesi oluşturulmadıysa veya eşleşmeler boşsa oluştur
+    if (cachedMatches.length === 0) {
+      cachedMatches = matchTeamMembers(team.members);
+    }
+
+    // Eğer takım üyeleri sayısı, eşleşme listesindeki eşleşme sayısından fazlaysa
+    // yeni bir eşleşme listesi oluştur
+    if (team.members.length > cachedMatches.length) {
+      cachedMatches = matchTeamMembers(team.members);
+    }
 
     // Eğer eşleşme varsa, ilk eşleşmenin detaylarını al
     let matchedUserDetails = null;
-    if (matches.length > 0) {
-      const firstMatch = matches[0];
-      const matchedUserId =
-        firstMatch.user2._id.toString() === team.members[0]._id.toString()
-          ? firstMatch.user1._id
-          : firstMatch.user2._id;
+    if (cachedMatches.length > 0) {
+      const firstMatch = cachedMatches[0];
 
-      const matchedUser = await RaffleEntry.findById(matchedUserId);
-      matchedUserDetails = {
-        _id: matchedUser._id,
-        name: matchedUser.name,
-        team: teamName,
-      };
+      // Güvenli bir şekilde özelliklere erişim sağlayarak hatayı önle
+      const user1Id = firstMatch.user1 ? firstMatch.user1._id : null;
+      const user2Id = firstMatch.user2 ? firstMatch.user2._id : null;
+
+      const matchedUserId =
+        user2Id && user2Id.toString() === team.members[0]._id.toString()
+          ? user1Id
+          : user2Id;
+
+      if (matchedUserId) {
+        const matchedUser = await RaffleEntry.findById(matchedUserId);
+        matchedUserDetails = {
+          _id: matchedUser._id,
+          name: matchedUser.name,
+          team: teamName,
+        };
+
+        // Eşleşme tamamlandığında kullanılan eşleşmeyi listeden kaldır
+        cachedMatches = cachedMatches.filter(
+          (match) =>
+            match.user1 &&
+            match.user1._id.toString() !== matchedUserId &&
+            match.user2 &&
+            match.user2._id.toString() !== matchedUserId
+        );
+      }
     }
 
     res.json({
@@ -133,10 +156,49 @@ router.get("/match-users/:teamName", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Ekipler arasında eşleşme yapılırken bir hata oluştu",
-      error,
+      error: error.message,
     });
   }
 });
+
+// Belirli bir ekip altındaki katılımcılar arasında eşleşme yapma fonksiyonu
+function matchTeamMembers(members) {
+  const matches = [];
+  const alreadyMatched = new Set();
+
+  for (let i = 0; i < members.length; i++) {
+    if (alreadyMatched.has(members[i]._id)) {
+      continue;
+    }
+
+    let matchFound = false;
+    let attemptCount = 0;
+
+    while (!matchFound && attemptCount < members.length) {
+      const randomIndex = Math.floor(Math.random() * members.length);
+      const user1 = members[i];
+      const user2 = members[randomIndex];
+
+      if (
+        user1 !== user2 &&
+        !alreadyMatched.has(user1._id) &&
+        !alreadyMatched.has(user2._id)
+      ) {
+        matches.push({
+          user1: { _id: user1._id, name: user1.name },
+          user2: { _Id: user2._id, name: user2.name },
+        });
+        alreadyMatched.add(user1._id);
+        alreadyMatched.add(user2._id);
+        matchFound = true;
+      }
+
+      attemptCount++;
+    }
+  }
+
+  return matches;
+}
 
 router.get("/match-users/:teamName/:participantName", async (req, res) => {
   try {
@@ -168,13 +230,36 @@ router.get("/match-users/:teamName/:participantName", async (req, res) => {
         .json({ success: false, message: "Belirtilen katılımcı bulunamadı" });
     }
 
-    const matches = matchTeamMembers(team.members);
-    const matchedUser = findMatchedUser(matches, participant._id);
+    // Eğer daha önce eşleşme listesi oluşturulmadıysa veya eşleşmeler boşsa oluştur
+    if (cachedMatches.length === 0) {
+      cachedMatches = createMatchList(team.members);
+
+      // Eğer eşleşme listesi oluşturulamazsa hata mesajı döndür
+      if (cachedMatches.length === 0) {
+        return res.json({
+          success: false,
+          message: "Eşleşme listesi oluşturulamadı",
+          matchedUser: null,
+        });
+      }
+    }
+
+    // Eşleşme listesini kullanarak eşleşmeyi kontrol et
+    const matchedUser = findMatchedUser(cachedMatches, participant._id);
 
     if (!matchedUser) {
+      console.log("Uygun bir eşleşme bulunamadı.");
       return res.json({
         success: true,
         message: "Eşleşme bulunamadı",
+        matchedUser: null,
+      });
+    }
+    if (matchedUser._id.toString() === participant._id.toString()) {
+      // Katılımcının kendisiyle eşleşmesi durumunu özel olarak ele alabilirsiniz
+      return res.json({
+        success: false,
+        message: "Katılımcı kendisiyle eşleşmiştir",
         matchedUser: null,
       });
     }
@@ -188,14 +273,51 @@ router.get("/match-users/:teamName/:participantName", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Ekipler arasında eşleşme yapılırken bir hata oluştu",
-      error,
+      error: error.message,
     });
   }
 });
 
-// Eşleşme bulma fonksiyonu
-function findMatchedUser(matches, participantId) {
-  for (const match of matches) {
+// Eşleşme listesini oluştur
+function createMatchList(members) {
+  const matches = [];
+  const alreadyMatched = new Set();
+
+  for (let i = 0; i < members.length; i++) {
+    const randomIndex = getRandomUnmatchedIndex(
+      i,
+      members.length,
+      alreadyMatched
+    );
+    const user1 = members[i];
+    const user2 = members[randomIndex];
+
+    matches.push({
+      user1: { _id: user1._id, name: user1.name },
+      user2: { _id: user2._id, name: user2.name },
+    });
+
+    alreadyMatched.add(user1._id);
+    alreadyMatched.add(user2._id);
+  }
+
+  return matches;
+}
+
+// Verilen bir aralıkta henüz eşleşmemiş bir index bul
+function getRandomUnmatchedIndex(currentIndex, maxIndex, alreadyMatched) {
+  let randomIndex;
+
+  do {
+    randomIndex = Math.floor(Math.random() * maxIndex);
+  } while (randomIndex === currentIndex || alreadyMatched.has(randomIndex));
+
+  return randomIndex;
+}
+
+// Her seferinde eşleşme listesini kullanarak eşleşmeyi kontrol et
+function findMatchedUser(matchedUserList, participantId) {
+  for (const match of matchedUserList) {
     if (match.user1._id.toString() === participantId.toString()) {
       return match.user2;
     } else if (match.user2._id.toString() === participantId.toString()) {
@@ -203,45 +325,6 @@ function findMatchedUser(matches, participantId) {
     }
   }
   return null;
-}
-
-// Belirli bir ekip altındaki katılımcılar arasında eşleşme yapma fonksiyonu
-function matchTeamMembers(members) {
-  const matches = [];
-  const alreadyMatched = new Set();
-
-  for (let i = 0; i < members.length; i++) {
-    if (alreadyMatched.has(members[i]._id)) {
-      continue;
-    }
-
-    let matchFound = false;
-    let attemptCount = 0;
-
-    while (!matchFound && attemptCount < members.length) {
-      const randomIndex = Math.floor(Math.random() * members.length);
-      const user1 = members[i];
-      const user2 = members[randomIndex];
-
-      if (
-        user1 !== user2 &&
-        !alreadyMatched.has(user1._id) &&
-        !alreadyMatched.has(user2._id)
-      ) {
-        matches.push({
-          user1: { _id: user1._id, name: user1.name },
-          user2: { _id: user2._id, name: user2.name },
-        });
-        alreadyMatched.add(user1._id);
-        alreadyMatched.add(user2._id);
-        matchFound = true;
-      }
-
-      attemptCount++;
-    }
-  }
-
-  return matches;
 }
 
 router.get("/get-matched-user/:userName", async (req, res) => {
