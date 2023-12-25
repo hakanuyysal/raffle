@@ -148,6 +148,7 @@ router.get("/match-users/:teamName", async (req, res) => {
 
     const team = await Team.findOne({
       name: { $regex: new RegExp(`^${teamName}$`, "i") },
+      // name: teamName,
     });
 
     if (!team) {
@@ -155,6 +156,8 @@ router.get("/match-users/:teamName", async (req, res) => {
         .status(404)
         .json({ success: false, message: "Belirtilen ekip bulunamadı" });
     }
+    // Her istek başında cachedMatches'i sıfırla
+    let cachedMatches = [];
 
     // Eğer daha önce eşleşme listesi oluşturulmadıysa veya eşleşmeler boşsa oluştur
     if (cachedMatches.length === 0) {
@@ -192,13 +195,6 @@ router.get("/match-users/:teamName", async (req, res) => {
           user2Id.toString() === team.members[0]._id.toString()
             ? user1Id
             : user2Id;
-
-        // const matchedUser = await RaffleEntry.findById(matchedUserId);
-        // matchedUserDetails = {
-        //   _id: matchedUser._id,
-        //   name: matchedUser.name,
-        //   team: teamName,
-        // };
 
         // Eşleşme tamamlandığında kullanılan eşleşmeyi listeden kaldır
         cachedMatches = cachedMatches.filter(
@@ -261,7 +257,6 @@ function matchTeamMembers(members) {
         }
       }
     }
-
     return matches;
   } catch (error) {
     console.log(error.message);
